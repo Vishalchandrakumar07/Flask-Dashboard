@@ -11,13 +11,8 @@
       crossorigin="anonymous"
     />
 
-    <!-- Corrected Chart.js Script -->
-    <script
-      src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.min.js"
-      integrity="sha512-L0Shl7nXXzIlBSUUPpxrokqq4ojqgZFQczTYlGjzONGTDAcLremjwaWv5A+EDLnxhQzY5xUZPWLOLqYRkY0Cbw=="
-      crossorigin="anonymous"
-      referrerpolicy="no-referrer"
-    ></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+   
 
     {% if title %}
     <title>ExpenseApp - {{ title }}</title>
@@ -52,7 +47,9 @@
                     href="{{ url_for('add_expense') }}"
                     >Add</a
                   >
-                  <a class="nav-item nav-link" href="#">Dashboard</a>
+                  <a class="nav-item nav-link" href="/dashboard"
+                    >Dashboard</a
+                  >
                 </div>
               </div>
             </nav>

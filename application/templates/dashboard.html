@@ -1,36 +1,153 @@
-{% extends "layout.html" %} {% block content %}
-<div class="col-xs-10 col-sm-6 col-md-6">
-  <div class="card card-style mb-2">
-    <div class="card-body">
-      <div class="chart-container" style="position: relative">
-        <canvas id="income_vs_expense"></canvas>
-      </div>
-    </div>
+{% extends 'layout.html' %}
+
+{% block content %}
+<h1>Dashboard</h1>
+<div class="card-container">
+  <div class="card income-card">
+    <h2>Total Income</h2>
+    <p>${{ "%.2f"|format(income/100) }}</p>
+    <svg class="graph" viewBox="0 0 100 50">
+      <polyline points="0,50 20,40 40,45 60,20 80,10 100,5" fill="none" stroke="green" stroke-width="2" />
+    </svg>
+  </div>
+
+  <div class="card expense-card">
+    <h2>Total Expenses</h2>
+    <p>${{ "%.2f"|format(expenses/100) }}</p>
+    <svg class="graph" viewBox="0 0 100 50">
+      <polyline points="0,10 20,15 40,25 60,20 80,35 100,45" fill="none" stroke="yellow" stroke-width="2" />
+    </svg>
   </div>
 </div>
-{% endblock %} {% block javascript %}
-<script>
-  const ctx = document.getElementById("income_vs_expense");
 
-  new Chart(ctx, {
-    type: "bar",
+<style>
+  .card-container {
+    display: flex;
+    justify-content: space-around;
+    margin-bottom: 20px;
+  }
+
+  .card {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 20px;
+    width: 45%;
+    /* Adjusted width */
+    max-width: 300px;
+    /* Added max-width */
+    text-align: center;
+  }
+
+  .income-card {
+    background-color: #e6ffe6;
+  }
+
+  .expense-card {
+    background-color: #fffbe6;
+  }
+
+  .graph {
+    width: 100%;
+    height: 50px;
+  }
+</style>
+
+
+<div class="charts-container">
+  <div class="chart-wrapper">
+    <canvas id="categoryBarChart"></canvas>
+  </div>
+  <div class="chart-wrapper">
+    <canvas id="categoryPieChart"></canvas>
+  </div>
+</div>
+
+<style>
+  .charts-container {
+    margin-top: 20px;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    width: 100%;
+    padding: 0 20px;
+  }
+
+  .chart-wrapper {
+    height: 50vh;
+    width: 48%;
+    padding: 15px;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+</style>
+
+<script>
+  const categories = {{ categories| map(attribute = 0) | list | tojson }};
+  const amounts = {{ categories| map(attribute = 1) | list | tojson }};
+
+  // Bar Chart
+  const ctxBar = document.getElementById('categoryBarChart').getContext('2d');
+  new Chart(ctxBar, {
+    type: 'bar',
     data: {
-      labels: ["Red", "Blue", "Yellow", "Green", "Purple", "Orange"],
-      datasets: [
-        {
-          label: "# of Votes",
-          data: [12, 19, 3, 5, 2, 3],
-          borderWidth: 1,
-        },
-      ],
+      labels: categories,
+      datasets: [{
+        label: 'Amount',
+        data: amounts,
+        backgroundColor: 'rgba(75, 192, 192, 0.6)'
+      }]
     },
     options: {
+      responsive: true,
       scales: {
         y: {
           beginAtZero: true,
-        },
-      },
+          ticks: {
+            callback: function (value) {
+              return '$' + (value / 100).toFixed(2);
+            }
+          }
+        }
+      }
+    }
+  });
+
+  // Pie Chart
+  const ctxPie = document.getElementById('categoryPieChart').getContext('2d');
+  new Chart(ctxPie, {
+    type: 'pie',
+    data: {
+      labels: categories,
+      datasets: [{
+        data: amounts,
+        backgroundColor: [
+          'rgba(255, 99, 132, 0.8)',
+          'rgba(54, 162, 235, 0.8)',
+          'rgba(255, 206, 86, 0.8)',
+          'rgba(75, 192, 192, 0.8)',
+          'rgba(153, 102, 255, 0.8)',
+        ],
+      }]
     },
+    options: {
+      responsive: true,
+      plugins: {
+        tooltip: {
+          callbacks: {
+            label: function (context) {
+              let label = context.label || '';
+              if (label) {
+                label += ': ';
+              }
+              const value = context.raw;
+              label += '$' + (value / 100).toFixed(2);
+              return label;
+            }
+          }
+        }
+      }
+    }
   });
 </script>
 {% endblock %}
