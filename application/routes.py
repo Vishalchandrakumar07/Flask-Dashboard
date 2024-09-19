@@ -4,6 +4,7 @@ from application.form import UserInputForm
 from application.models import IncomeExpenses
 from sqlalchemy import func
 
+
 @app.route("/")
 def index():
     entries = IncomeExpenses.query.order_by(IncomeExpenses.date.desc()).all()
@@ -34,13 +35,29 @@ def delete(entry_id):
     return redirect(url_for("index"))
 
 
-@app.route('/dashboard')
+@app.route("/dashboard")
 def dashboard():
     # Get total income and expenses
-    income = db.session.query(func.sum(IncomeExpenses.amount)).filter(IncomeExpenses.type == 'income').scalar() or 0
-    expenses = db.session.query(func.sum(IncomeExpenses.amount)).filter(IncomeExpenses.type == 'expense').scalar() or 0
-    
+    income = (
+        db.session.query(func.sum(IncomeExpenses.amount))
+        .filter(IncomeExpenses.type == "income")
+        .scalar()
+        or 0
+    )
+    expenses = (
+        db.session.query(func.sum(IncomeExpenses.amount))
+        .filter(IncomeExpenses.type == "expense")
+        .scalar()
+        or 0
+    )
+
     # Get data for chart
-    categories = db.session.query(IncomeExpenses.category, func.sum(IncomeExpenses.amount)).group_by(IncomeExpenses.category).all()
-    
-    return render_template('dashboard.html', income=income, expenses=expenses, categories=categories)
+    categories = (
+        db.session.query(IncomeExpenses.category, func.sum(IncomeExpenses.amount))
+        .group_by(IncomeExpenses.category)
+        .all()
+    )
+
+    return render_template(
+        "dashboard.html", income=income, expenses=expenses, categories=categories
+    )

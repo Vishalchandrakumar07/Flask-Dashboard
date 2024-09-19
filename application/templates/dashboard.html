@@ -1,21 +1,32 @@
-{% extends 'layout.html' %}
-
-{% block content %}
+{% extends 'layout.html' %} {% block content %}
 <h1>Dashboard</h1>
+
 <div class="card-container">
   <div class="card income-card">
     <h2>Total Income</h2>
-    <p>${{ "%.2f"|format(income/100) }}</p>
+    <p>{{ income }}</p>
+    <!-- Display total income as a number -->
     <svg class="graph" viewBox="0 0 100 50">
-      <polyline points="0,50 20,40 40,45 60,20 80,10 100,5" fill="none" stroke="green" stroke-width="2" />
+      <polyline
+        points="0,50 20,40 40,45 60,20 80,10 100,5"
+        fill="none"
+        stroke="green"
+        stroke-width="2"
+      />
     </svg>
   </div>
 
   <div class="card expense-card">
     <h2>Total Expenses</h2>
-    <p>${{ "%.2f"|format(expenses/100) }}</p>
+    <p>{{ expenses }}</p>
+    <!-- Display total expenses as a number -->
     <svg class="graph" viewBox="0 0 100 50">
-      <polyline points="0,10 20,15 40,25 60,20 80,35 100,45" fill="none" stroke="yellow" stroke-width="2" />
+      <polyline
+        points="0,10 20,15 40,25 60,20 80,35 100,45"
+        fill="none"
+        stroke="yellow"
+        stroke-width="2"
+      />
     </svg>
   </div>
 </div>
@@ -32,9 +43,7 @@
     border-radius: 8px;
     padding: 20px;
     width: 45%;
-    /* Adjusted width */
     max-width: 300px;
-    /* Added max-width */
     text-align: center;
   }
 
@@ -52,13 +61,13 @@
   }
 </style>
 
-
+<!-- Chart containers for Pie Chart and Bar Chart -->
 <div class="charts-container">
   <div class="chart-wrapper">
-    <canvas id="categoryBarChart"></canvas>
+    <canvas id="incomeExpensePieChart"></canvas>
   </div>
   <div class="chart-wrapper">
-    <canvas id="categoryPieChart"></canvas>
+    <canvas id="incomeExpenseBarChart"></canvas>
   </div>
 </div>
 
@@ -66,7 +75,6 @@
   .charts-container {
     margin-top: 20px;
     display: flex;
-    flex-direction: row;
     justify-content: space-between;
     width: 100%;
     padding: 0 20px;
@@ -83,50 +91,20 @@
 </style>
 
 <script>
-  const categories = {{ categories| map(attribute = 0) | list | tojson }};
-  const amounts = {{ categories| map(attribute = 1) | list | tojson }};
+  const income = {{ income }};
+  const expenses = {{ expenses }};
 
-  // Bar Chart
-  const ctxBar = document.getElementById('categoryBarChart').getContext('2d');
-  new Chart(ctxBar, {
-    type: 'bar',
-    data: {
-      labels: categories,
-      datasets: [{
-        label: 'Amount',
-        data: amounts,
-        backgroundColor: 'rgba(75, 192, 192, 0.6)'
-      }]
-    },
-    options: {
-      responsive: true,
-      scales: {
-        y: {
-          beginAtZero: true,
-          ticks: {
-            callback: function (value) {
-              return '$' + (value / 100).toFixed(2);
-            }
-          }
-        }
-      }
-    }
-  });
-
-  // Pie Chart
-  const ctxPie = document.getElementById('categoryPieChart').getContext('2d');
+  // Pie Chart for Income vs Expenses
+  const ctxPie = document.getElementById('incomeExpensePieChart').getContext('2d');
   new Chart(ctxPie, {
     type: 'pie',
     data: {
-      labels: categories,
+      labels: ['Total Income', 'Total Expenses'],
       datasets: [{
-        data: amounts,
+        data: [income, expenses],
         backgroundColor: [
-          'rgba(255, 99, 132, 0.8)',
-          'rgba(54, 162, 235, 0.8)',
-          'rgba(255, 206, 86, 0.8)',
-          'rgba(75, 192, 192, 0.8)',
-          'rgba(153, 102, 255, 0.8)',
+          'rgba(75, 192, 192, 0.8)',  // Color for Income
+          'rgba(255, 99, 132, 0.8)'   // Color for Expenses
         ],
       }]
     },
@@ -141,7 +119,7 @@
                 label += ': ';
               }
               const value = context.raw;
-              label += '$' + (value / 100).toFixed(2);
+              label += value; // Display value without formatting
               return label;
             }
           }
@@ -149,5 +127,36 @@
       }
     }
   });
+
+  // Bar Chart for Income vs Expenses
+  const ctxBar = document.getElementById('incomeExpenseBarChart').getContext('2d');
+  new Chart(ctxBar, {
+    type: 'bar',
+    data: {
+      labels: ['Total Income', 'Total Expenses'],
+      datasets: [{
+        label: 'Amount',
+        data: [income, expenses],
+        backgroundColor: [
+          'rgba(75, 192, 192, 0.6)',  // Color for Income
+          'rgba(255, 99, 132, 0.6)'   // Color for Expenses
+        ]
+      }]
+    },
+    options: {
+      responsive: true,
+      scales: {
+        y: {
+          beginAtZero: true,
+          ticks: {
+            callback: function (value) {
+              return value; // Display value without formatting
+            }
+          }
+        }
+      }
+    }
+  });
 </script>
+
 {% endblock %}
